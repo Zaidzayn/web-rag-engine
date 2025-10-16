@@ -11,35 +11,33 @@ The architecture is built around a hybrid AI model: it leverages a **local, priv
 The system is designed with a decoupled, message-driven architecture to ensure scalability, resilience, and responsiveness. The user-facing API is separated from the heavy-lifting of data processing, which happens asynchronously in background workers.
 
 
-```mermaid
 graph TD
-    subgraph User Interaction
+    subgraph "User Interaction"
         User -- "1. POST /ingest-url" --> API[API Server (FastAPI)]
         API -- "2. Returns 202 Accepted" --> User
         User -- "A. POST /query" --> API
         API -- "F. Returns Answer" --> User
     end
 
-    subgraph Backend Processing (Asynchronous)
+    subgraph "Backend Processing (Asynchronous)"
         API -- "3. Creates PENDING record" --> MetaDB[(Metadata DB - PostgreSQL)]
         API -- "4. Enqueues Job" --> Queue[(Task Queue - Redis)]
         Worker[Celery Worker(s)] -- "5. Polls for jobs" --> Queue
-        Worker -- "6. Scrapes, Chunks, Embeds (Locally)" --> LocalModel[Local Embedding Model]
+        Worker -- "6. Scrapes, Chunks, Embeds (Locally)" --> LocalModel["Local Embedding Model (SentenceTransformer)"]
         LocalModel -- "Vectors" --> Worker
         Worker -- "7. Stores Vectors" --> VecDB[(Vector DB - Qdrant)]
         Worker -- "8. Updates status to COMPLETED" --> MetaDB
     end
 
-    subgraph Query Path (Synchronous)
+    subgraph "Query Path (Synchronous)"
         API -- "B. Embeds Question" --> LocalModel
         API -- "C. Searches for Context" --> VecDB
-        API -- "D. Sends Context + Question" --> Groq[Groq Cloud API]
+        API -- "D. Sends Context + Question" --> Groq["Groq Cloud API (Llama 3)"]
         Groq -- "E. Generates Answer" --> API
     end
 
     style User fill:#cde,stroke:#333
     style Groq fill:#cde,stroke:#333
-```
 
 ---
 
