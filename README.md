@@ -168,7 +168,7 @@ Asks a question against the ingested content.
 
 2.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/your-username/web-rag-engine.git](https://github.com/your-username/web-rag-engine.git)
+    git clone [[https://github.com/your-username/web-rag-engine.git](https://github.com/Zaidzayn/web-rag-engine)]
     cd web-rag-engine
     ```
 
